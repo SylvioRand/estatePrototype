@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trust Estate - Prototype MVP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-brand">
+                <span class="logo">🏠</span>
+                <span class="brand-name">Trust Estate</span>
+            </div>
+            <div class="nav-links">
+                <button class="nav-btn" data-screen="home">Accueil</button>
+                <button class="nav-btn" data-screen="listings">Annonces</button>
+                <button class="nav-btn" data-screen="dashboard">Mon Espace</button>
+            </div>
+            <div class="nav-auth">
+                <span class="credits-badge" id="creditsDisplay">💰 5 crédits</span>
+                <button class="btn-login" id="authBtn">Se connecter</button>
+            </div>
+        </nav>
+
+        <!-- Screens Container -->
+        <main class="screens-container">
+            
+            <!-- A1. Home Screen -->
+            <section class="screen active" id="screen-home">
+                <div class="hero">
+                    <div class="hero-content">
+                        <h1>Trouvez votre bien immobilier à Madagascar</h1>
+                        <p>La plateforme de confiance pour acheter, vendre ou louer</p>
+                        <div class="search-box">
+                            <select class="search-select" id="searchType">
+                                <option value="">Type de bien</option>
+                                <option value="sale">Vente</option>
+                                <option value="rent">Location</option>
+                            </select>
+                            <select class="search-select" id="searchZone">
+                                <option value="">Zone</option>
+                                <option value="tana-analakely">Antananarivo - Analakely</option>
+                                <option value="tana-ivandry">Antananarivo - Ivandry</option>
+                                <option value="tana-ankorondrano">Antananarivo - Ankorondrano</option>
+                            </select>
+                            <button class="btn-search" onclick="navigateTo('listings')">🔍 Rechercher</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="featured-section">
+                    <h2>Annonces en vedette</h2>
+                    <div class="listings-grid" id="featuredListings"></div>
+                </div>
+            </section>
+
+            <!-- A2. Listings Screen -->
+            <section class="screen" id="screen-listings">
+                <div class="listings-header">
+                    <h2>Annonces disponibles</h2>
+                    <div class="filters">
+                        <select class="filter-select" id="filterType">
+                            <option value="">Tous types</option>
+                            <option value="sale">Vente</option>
+                            <option value="rent">Location</option>
+                        </select>
+                        <input type="number" class="filter-input" placeholder="Prix min" id="filterMinPrice">
+                        <input type="number" class="filter-input" placeholder="Prix max" id="filterMaxPrice">
+                        <button class="btn-filter" onclick="applyFilters()">Filtrer</button>
+                    </div>
+                </div>
+                <div class="listings-grid" id="listingsGrid"></div>
+                <div class="no-results hidden" id="noResults">
+                    <p>😔 Aucune annonce trouvée</p>
+                </div>
+            </section>
+
+            <!-- A3. Listing Detail Screen -->
+            <section class="screen" id="screen-detail">
+                <div class="detail-container" id="listingDetail"></div>
+            </section>
+
+            <!-- A4. Reservation Screen -->
+            <section class="screen" id="screen-reservation">
+                <div class="reservation-container">
+                    <h2>Réserver une visite</h2>
+                    <div class="reservation-summary" id="reservationSummary"></div>
+                    <div class="slots-container">
+                        <h3>Créneaux disponibles</h3>
+                        <div class="slots-grid" id="slotsGrid"></div>
+                    </div>
+                    <button class="btn-primary btn-confirm" onclick="confirmReservation()" id="confirmBtn" disabled>
+                        Confirmer la réservation
+                    </button>
+                </div>
+            </section>
+
+            <!-- A5. Confirmation Screen -->
+            <section class="screen" id="screen-confirmation">
+                <div class="confirmation-container">
+                    <div class="confirmation-icon">✅</div>
+                    <h2>Réservation confirmée !</h2>
+                    <div class="confirmation-details" id="confirmationDetails"></div>
+                    <div class="seller-contact" id="sellerContact"></div>
+                    <button class="btn-secondary" onclick="navigateTo('home')">Retour à l'accueil</button>
+                </div>
+            </section>
+
+            <!-- A6. Feedback Screen -->
+            <section class="screen" id="screen-feedback">
+                <div class="feedback-container">
+                    <h2>Donner un feedback</h2>
+                    <div class="feedback-listing" id="feedbackListing"></div>
+                    <div class="rating-container">
+                        <p>Note :</p>
+                        <div class="stars" id="starsContainer">
+                            <span class="star" data-rating="1">☆</span>
+                            <span class="star" data-rating="2">☆</span>
+                            <span class="star" data-rating="3">☆</span>
+                            <span class="star" data-rating="4">☆</span>
+                            <span class="star" data-rating="5">☆</span>
+                        </div>
+                    </div>
+                    <textarea class="feedback-comment" placeholder="Votre commentaire..." id="feedbackComment"></textarea>
+                    <button class="btn-primary" onclick="submitFeedback()">Envoyer le feedback</button>
+                </div>
+            </section>
+
+            <!-- B1. Dashboard Screen -->
+            <section class="screen" id="screen-dashboard">
+                <div class="dashboard-container">
+                    <div class="dashboard-header">
+                        <h2>Mon Espace</h2>
+                        <div class="dashboard-stats">
+                            <div class="stat-card">
+                                <span class="stat-value" id="statCredits">5</span>
+                                <span class="stat-label">Crédits</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-value" id="statListings">0</span>
+                                <span class="stat-label">Annonces</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-value" id="statReservations">0</span>
+                                <span class="stat-label">Réservations</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-tabs">
+                        <button class="tab-btn active" data-tab="myListings">Mes Annonces</button>
+                        <button class="tab-btn" data-tab="myReservations">Mes Réservations</button>
+                        <button class="tab-btn" data-tab="myVisits">Mes Visites</button>
+                    </div>
+                    
+                    <div class="tab-content active" id="tab-myListings">
+                        <button class="btn-primary btn-new-listing" onclick="navigateTo('create')">
+                            + Créer une annonce
+                        </button>
+                        <div class="my-listings-grid" id="myListingsGrid"></div>
+                    </div>
+                    
+                    <div class="tab-content" id="tab-myReservations">
+                        <div class="reservations-list" id="myReservationsList"></div>
+                    </div>
+                    
+                    <div class="tab-content" id="tab-myVisits">
+                        <div class="visits-list" id="myVisitsList"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- B2. Create Listing Screen -->
+            <section class="screen" id="screen-create">
+                <div class="create-container">
+                    <h2>Créer une annonce</h2>
+                    <div class="create-steps">
+                        <div class="step active" data-step="1">1. Type</div>
+                        <div class="step" data-step="2">2. Infos</div>
+                        <div class="step" data-step="3">3. Photos</div>
+                        <div class="step" data-step="4">4. Description</div>
+                        <div class="step" data-step="5">5. Paiement</div>
+                    </div>
+                    
+                    <!-- Step 1: Type -->
+                    <div class="create-step-content active" id="createStep1">
+                        <h3>Type de transaction</h3>
+                        <div class="type-buttons">
+                            <button class="type-btn" data-type="sale" onclick="selectType('sale')">
+                                🏷️ Vente
+                            </button>
+                            <button class="type-btn" data-type="rent" onclick="selectType('rent')">
+                                🔑 Location
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2: Info -->
+                    <div class="create-step-content" id="createStep2">
+                        <h3>Informations du bien</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Titre</label>
+                                <input type="text" id="listingTitle" placeholder="Ex: Maison T4 avec jardin">
+                            </div>
+                            <div class="form-group">
+                                <label>Zone</label>
+                                <select id="listingZone">
+                                    <option value="tana-analakely">Antananarivo - Analakely</option>
+                                    <option value="tana-ivandry">Antananarivo - Ivandry</option>
+                                    <option value="tana-ankorondrano">Antananarivo - Ankorondrano</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Prix (Ariary)</label>
+                                <input type="number" id="listingPrice" placeholder="Ex: 50000000">
+                            </div>
+                            <div class="form-group">
+                                <label>Surface (m²)</label>
+                                <input type="number" id="listingSurface" placeholder="Ex: 120">
+                            </div>
+                            <div class="form-group">
+                                <label>Chambres</label>
+                                <input type="number" id="listingBedrooms" placeholder="Ex: 3">
+                            </div>
+                            <div class="form-group">
+                                <label>Salles de bain</label>
+                                <input type="number" id="listingBathrooms" placeholder="Ex: 2">
+                            </div>
+                        </div>
+                        <div class="features-checkboxes">
+                            <label><input type="checkbox" id="featureParking"> 🚗 Parking</label>
+                            <label><input type="checkbox" id="featureGarden"> 🌳 Jardin</label>
+                            <label><input type="checkbox" id="featurePool"> 🏊 Piscine</label>
+                            <label><input type="checkbox" id="featureFurnished"> 🛋️ Meublé</label>
+                        </div>
+                        <button class="btn-primary" onclick="nextStep(3)">Suivant</button>
+                    </div>
+                    
+                    <!-- Step 3: Photos -->
+                    <div class="create-step-content" id="createStep3">
+                        <h3>Photos du bien</h3>
+                        <div class="photo-upload-zone" id="photoUploadZone">
+                            <p>📷 Cliquez ou glissez des photos ici</p>
+                            <input type="file" multiple accept="image/*" id="photoInput" onchange="handlePhotoUpload(event)">
+                        </div>
+                        <div class="photo-preview" id="photoPreview"></div>
+                        <button class="btn-primary" onclick="nextStep(4)">Suivant</button>
+                    </div>
+                    
+                    <!-- Step 4: Description -->
+                    <div class="create-step-content" id="createStep4">
+                        <h3>Description</h3>
+                        <div class="ai-generate-section">
+                            <button class="btn-ai" onclick="generateDescription()" id="aiGenerateBtn">
+                                ✨ Générer avec IA
+                            </button>
+                            <span class="ai-counter" id="aiCounter">3 générations restantes</span>
+                        </div>
+                        <textarea class="description-textarea" id="listingDescription" placeholder="Décrivez votre bien..."></textarea>
+                        <button class="btn-primary" onclick="nextStep(5)">Suivant</button>
+                    </div>
+                    
+                    <!-- Step 5: Payment -->
+                    <div class="create-step-content" id="createStep5">
+                        <h3>Confirmation et paiement</h3>
+                        <div class="payment-summary">
+                            <div class="payment-row">
+                                <span>Votre solde actuel</span>
+                                <span id="currentBalance">5 crédits</span>
+                            </div>
+                            <div class="payment-row">
+                                <span>Coût de publication</span>
+                                <span class="cost">-1 crédit</span>
+                            </div>
+                            <div class="payment-row total">
+                                <span>Solde après publication</span>
+                                <span id="newBalance">4 crédits</span>
+                            </div>
+                        </div>
+                        <button class="btn-primary btn-publish" onclick="publishListing()">
+                            📤 Publier mon annonce
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- B5. Publication Success Screen -->
+            <section class="screen" id="screen-published">
+                <div class="success-container">
+                    <div class="success-icon">🎉</div>
+                    <h2>Annonce publiée !</h2>
+                    <p>Votre annonce est maintenant visible par tous les utilisateurs.</p>
+                    <div class="published-preview" id="publishedPreview"></div>
+                    <div class="action-buttons">
+                        <button class="btn-secondary" onclick="navigateTo('dashboard')">Mon espace</button>
+                        <button class="btn-primary" onclick="viewPublishedListing()">Voir l'annonce</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Login Modal -->
+            <div class="modal" id="loginModal">
+                <div class="modal-content">
+                    <span class="modal-close" onclick="closeModal()">&times;</span>
+                    <h2>Connexion</h2>
+                    <div class="login-options">
+                        <button class="btn-login-option" onclick="loginWithPhone()">
+                            📱 Connexion par téléphone
+                        </button>
+                        <button class="btn-login-option" onclick="loginWithEmail()">
+                            📧 Connexion par email
+                        </button>
+                        <button class="btn-login-option google" onclick="loginWithGoogle()">
+                            <img src="https://www.google.com/favicon.ico" alt="Google">
+                            Continuer avec Google
+                        </button>
+                    </div>
+                    <div class="login-form hidden" id="phoneLoginForm">
+                        <input type="tel" placeholder="+261 34 00 000 00" id="phoneInput">
+                        <button class="btn-primary" onclick="submitPhoneLogin()">Se connecter</button>
+                    </div>
+                    <div class="login-form hidden" id="emailLoginForm">
+                        <input type="email" placeholder="Email" id="emailInput">
+                        <input type="password" placeholder="Mot de passe" id="passwordInput">
+                        <button class="btn-primary" onclick="submitEmailLogin()">Se connecter</button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Flow Navigator (for prototype) -->
+        <div class="flow-navigator">
+            <h4>📱 Navigation Prototype</h4>
+            <div class="flow-section">
+                <p>Flow A - Acheteur:</p>
+                <button onclick="navigateTo('home')">A1. Home</button>
+                <button onclick="navigateTo('listings')">A2. Liste</button>
+                <button onclick="showListing(1)">A3. Détail</button>
+                <button onclick="showReservation(1)">A4. Réserver</button>
+                <button onclick="showConfirmation()">A5. Confirm</button>
+                <button onclick="showFeedback()">A6. Feedback</button>
+            </div>
+            <div class="flow-section">
+                <p>Flow B - Vendeur:</p>
+                <button onclick="navigateTo('dashboard')">B1. Dashboard</button>
+                <button onclick="navigateTo('create')">B2. Créer</button>
+                <button onclick="navigateTo('published')">B5. Publié</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
